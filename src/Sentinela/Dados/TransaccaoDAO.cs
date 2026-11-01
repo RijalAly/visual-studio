@@ -76,7 +76,7 @@ public sealed class TransaccaoDAO
             @"SELECT t.*, c.Nome AS NomeCliente, c.NumeroConta
               FROM transaccoes t INNER JOIN clientes c ON c.Id=t.ClienteId
               ORDER BY t.DataHora DESC LIMIT @limite", ligacao);
-        comando.Parameters.AddWithValue("@limite", Math.Clamp(limite, 1, 100000));
+        comando.Parameters.AddWithValue("@limite", Math.Clamp(limite, 1, 500000));
         using var leitor = comando.ExecuteReader();
         while (leitor.Read()) lista.Add(LerTransaccao(leitor));
         return lista;
@@ -143,7 +143,7 @@ public sealed class TransaccaoDAO
         return dados;
     }
 
-    public void GuardarPredicoes(IReadOnlyCollection<(int Id, float Probabilidade, string Classe)> resultados)
+    public void GuardarPredicoes(IReadOnlyCollection<(long Id, float Probabilidade, string Classe)> resultados)
     {
         using var ligacao = ConexaoBD.Abrir(_configuracao);
         using var transaccao = ligacao.BeginTransaction();
