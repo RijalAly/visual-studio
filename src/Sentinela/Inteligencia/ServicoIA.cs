@@ -129,9 +129,9 @@ public sealed class ServicoIA
 
         foreach (var linha in linhas)
         {
-            if (linha.Etiqueta && linha.Previsao) vp++;
-            else if (!linha.Etiqueta && linha.Previsao) fp++;
-            else if (!linha.Etiqueta && !linha.Previsao) vn++;
+            if (linha.Label && linha.Previsao) vp++;
+            else if (!linha.Label && linha.Previsao) fp++;
+            else if (!linha.Label && !linha.Previsao) vn++;
             else fn++;
         }
 
