@@ -88,13 +88,14 @@ public sealed class FormularioRevisao : Form
         Controls.Add(nota);
 
         var cancelar = Tema.CriarBotaoSecundario("Cancelar");
-        cancelar.Location = new Point(330, 445);
+        cancelar.Location = new Point(340, 445);
+        cancelar.Width = 95;
         cancelar.DialogResult = DialogResult.Cancel;
         Controls.Add(cancelar);
 
         var guardar = Tema.CriarBotao("Guardar revisão");
-        guardar.Location = new Point(435, 445);
-        guardar.Width = 135;
+        guardar.Location = new Point(450, 445);
+        guardar.Width = 130;
         guardar.Click += (_, _) =>
         {
             if (EstadoSeleccionado != "Pendente" && Observacao.Length < 8)
