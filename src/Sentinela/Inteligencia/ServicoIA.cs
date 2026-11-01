@@ -27,7 +27,7 @@ public sealed class ServicoIA
         CarregarModelo();
     }
 
-    public ResultadoTreino Treinar(IReadOnlyCollection<DadosIA> dados, int numeroRevisoes)
+    public ResultadoTreino Treinar(IReadOnlyCollection<DadosIA> dados, int numeroRevisoes, Action<string>? comunicarProgresso = null)
     {
         if (dados.Count < 100)
             throw new InvalidOperationException("São necessários pelo menos 100 registos válidos para treinar o modelo.");
@@ -35,11 +35,14 @@ public sealed class ServicoIA
         if (dados.All(x => !x.Label) || dados.All(x => x.Label))
             throw new InvalidOperationException("O conjunto de dados tem de incluir transacções normais e suspeitas.");
 
+        comunicarProgresso?.Invoke("A dividir os dados: 80% para treino e 20% para teste...");
         var relogio = System.Diagnostics.Stopwatch.StartNew();
         IDataView conjunto = _ml.Data.LoadFromEnumerable(dados);
         var divisao = _ml.Data.TrainTestSplit(conjunto, testFraction: 0.2, seed: 42);
 
+        comunicarProgresso?.Invoke("A treinar e avaliar o algoritmo FastTree...");
         var resultadoArvore = TreinarCandidato(divisao.TrainSet, divisao.TestSet, usarArvore: true, dados.Count, numeroRevisoes);
+        comunicarProgresso?.Invoke("A treinar e avaliar a regressão logística (SDCA)...");
         var resultadoLogistico = TreinarCandidato(divisao.TrainSet, divisao.TestSet, usarArvore: false, dados.Count, numeroRevisoes);
 
         var escolhido = resultadoArvore.Resultado.F1 > resultadoLogistico.Resultado.F1
@@ -51,6 +54,7 @@ public sealed class ServicoIA
 
         var alternativo = ReferenceEquals(escolhido, resultadoArvore)
             ? resultadoLogistico : resultadoArvore;
+        comunicarProgresso?.Invoke($"Algoritmo seleccionado: {escolhido.Resultado.Algoritmo}. A guardar o modelo...");
 
         Directory.CreateDirectory(Path.GetDirectoryName(_caminhoModelo)!);
         _ml.Model.Save(escolhido.Modelo, divisao.TrainSet.Schema, _caminhoModelo);
@@ -71,6 +75,7 @@ public sealed class ServicoIA
         _treinos.Guardar(resultadoArvore.Resultado, ReferenceEquals(escolhido, resultadoArvore));
         _treinos.Guardar(resultadoLogistico.Resultado, ReferenceEquals(escolhido, resultadoLogistico));
 
+        comunicarProgresso?.Invoke("Treino concluído. O modelo foi guardado.");
         return escolhido.Resultado;
     }
 
