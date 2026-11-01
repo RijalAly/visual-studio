@@ -40,6 +40,7 @@ public sealed class PaginaConta : UserControl
         pagina.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52));
 
         var perfil = Tema.CriarCartao();
+        perfil.Height = 260;
         perfil.Dock = DockStyle.Top;
         perfil.Margin = new Padding(6);
         perfil.Controls.Add(Tema.CriarTitulo("A sua conta", 18));
@@ -84,6 +85,7 @@ public sealed class PaginaConta : UserControl
         perfil.Controls.Add(nota);
 
         var seguranca = Tema.CriarCartao();
+        seguranca.Height = 530;
         seguranca.Dock = DockStyle.Top;
         seguranca.Margin = new Padding(6);
         seguranca.Controls.Add(Tema.CriarTitulo("Alterar palavra-passe", 18));
