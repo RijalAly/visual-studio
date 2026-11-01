@@ -1,4 +1,5 @@
 using Sentinela.Controlos;
+using Sentinela.Dados;
 using Sentinela.Util;
 
 namespace Sentinela.Ecras;
@@ -97,7 +98,7 @@ public sealed class FormularioLigacao : Form
             return;
         }
 
-        if (!Dados.ConexaoBD.Testar(Configuracao, criarBase: true))
+        if (!ConexaoBD.Testar(Configuracao, criarBase: true))
         {
             MessageBox.Show("Não foi possível ligar ao MySQL. Confirme o endereço, a porta, as credenciais e se o serviço está iniciado.",
                 "Falha na ligação", MessageBoxButtons.OK, MessageBoxIcon.Error);
