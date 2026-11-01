@@ -254,7 +254,7 @@ public sealed class PaginaTransaccoes : UserControl
 
     private sealed class LinhaTransaccao
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public DateTime DataHora { get; set; }
         public string Cliente { get; set; } = "";
         public string Conta { get; set; } = "";
