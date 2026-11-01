@@ -108,7 +108,8 @@ public sealed class FormularioDetalheTransaccao : Form
         });
 
         var fechar = Tema.CriarBotao("Fechar");
-        fechar.Location = new Point(555, 570);
+        fechar.Location = new Point(505, 570);
+        fechar.Width = 155;
         fechar.Click += (_, _) => Close();
         Controls.Add(fechar);
     }
