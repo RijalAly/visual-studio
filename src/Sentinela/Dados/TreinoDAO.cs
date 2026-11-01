@@ -43,7 +43,7 @@ public sealed class TreinoDAO
         var resultados = new List<ResultadoTreino>();
         using var ligacao = ConexaoBD.Abrir(_configuracao);
         using var comando = new MySqlCommand(
-            @"SELECT Algoritmo, NumExemplos, NumRevisoes, NumTeste, Exactidao,
+            @"SELECT DataHora, Escolhido, Algoritmo, NumExemplos, NumRevisoes, NumTeste, Exactidao,
                      Precisao, Recall, F1, Auc, VP, FP, VN, FN, Duracao
               FROM treinos ORDER BY DataHora DESC, Id DESC LIMIT @limite", ligacao);
         comando.Parameters.AddWithValue("@limite", Math.Clamp(limite, 1, 100));
@@ -52,6 +52,8 @@ public sealed class TreinoDAO
         {
             resultados.Add(new ResultadoTreino
             {
+                DataHora = Convert.ToDateTime(leitor["DataHora"]),
+                Escolhido = Convert.ToBoolean(leitor["Escolhido"]),
                 Algoritmo = Convert.ToString(leitor["Algoritmo"]) ?? string.Empty,
                 Exemplos = Convert.ToInt32(leitor["NumExemplos"]),
                 Revisoes = Convert.ToInt32(leitor["NumRevisoes"]),
