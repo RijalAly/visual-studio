@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MySqlConnector;
 using Sentinela.Util;
 
@@ -7,6 +8,9 @@ public static class ConexaoBD
 {
     public static string CriarCadeia(ConfiguracaoApp configuracao, bool incluirBase = true)
     {
+        if (!Regex.IsMatch(configuracao.BaseDados, @"^[A-Za-z0-9_]+$"))
+            throw new ArgumentException("O nome da base de dados só pode conter letras, números e underscore.");
+
         var construtor = new MySqlConnectionStringBuilder
         {
             Server = configuracao.Servidor,
