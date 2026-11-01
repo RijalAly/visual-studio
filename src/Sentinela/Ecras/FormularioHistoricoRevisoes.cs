@@ -54,7 +54,8 @@ public sealed class FormularioHistoricoRevisoes : Form
         Controls.Add(_grelha);
 
         var fechar = Tema.CriarBotaoSecundario("Fechar");
-        fechar.Location = new Point(790, 482);
+        fechar.Location = new Point(755, 482);
+        fechar.Width = 150;
         fechar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         fechar.Click += (_, _) => Close();
         Controls.Add(fechar);
