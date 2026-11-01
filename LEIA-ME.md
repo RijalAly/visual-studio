@@ -74,3 +74,16 @@ A ligação fica em Documentos\Sentinela\ligacao.json e o modelo em Documentos\S
 ## Limitação
 
 Os dados e padrões de treino são simulados. As métricas são calculadas pelo programa sobre o conjunto de teste e não provam desempenho com fraude bancária real. O resultado é apoio à decisão e precisa de revisão humana.
+
+## Descarregar a aplicação Windows
+
+O repositório contém o código-fonte e a solução do Visual Studio. Para descarregar a versão executável:
+
+1. Abra [as compilações do Sentinela no GitHub Actions](https://github.com/RijalAly/visual-studio/actions/workflows/build.yml).
+2. Escolha a execução mais recente que tenha o estado **Success**.
+3. Na secção **Artifacts**, descarregue `Sentinela-Windows-x64`.
+4. Extraia o ZIP para uma pasta do computador.
+5. Inicie `Sentinela.exe`.
+
+A aplicação publicada necessita do .NET 8 Desktop Runtime para Windows e de MySQL ou MariaDB activo. O ZIP não inclui nem instala o servidor de base de dados.
+
