@@ -52,20 +52,20 @@ public sealed class TreinoDAO
         {
             resultados.Add(new ResultadoTreino
             {
-                Algoritmo = leitor.GetString("Algoritmo"),
-                Exemplos = leitor.GetInt32("NumExemplos"),
-                Revisoes = leitor.GetInt32("NumRevisoes"),
-                Teste = leitor.GetInt32("NumTeste"),
-                Exactidao = leitor.GetDouble("Exactidao"),
-                Precisao = leitor.GetDouble("Precisao"),
-                Recall = leitor.GetDouble("Recall"),
-                F1 = leitor.GetDouble("F1"),
-                Auc = leitor.GetDouble("Auc"),
-                VP = leitor.GetInt32("VP"),
-                FP = leitor.GetInt32("FP"),
-                VN = leitor.GetInt32("VN"),
-                FN = leitor.GetInt32("FN"),
-                DuracaoSegundos = leitor.GetDouble("Duracao")
+                Algoritmo = Convert.ToString(leitor["Algoritmo"]) ?? string.Empty,
+                Exemplos = Convert.ToInt32(leitor["NumExemplos"]),
+                Revisoes = Convert.ToInt32(leitor["NumRevisoes"]),
+                Teste = Convert.ToInt32(leitor["NumTeste"]),
+                Exactidao = Convert.ToDouble(leitor["Exactidao"]),
+                Precisao = Convert.ToDouble(leitor["Precisao"]),
+                Recall = Convert.ToDouble(leitor["Recall"]),
+                F1 = Convert.ToDouble(leitor["F1"]),
+                Auc = Convert.ToDouble(leitor["Auc"]),
+                VP = Convert.ToInt32(leitor["VP"]),
+                FP = Convert.ToInt32(leitor["FP"]),
+                VN = Convert.ToInt32(leitor["VN"]),
+                FN = Convert.ToInt32(leitor["FN"]),
+                DuracaoSegundos = Convert.ToDouble(leitor["Duracao"])
             });
         }
         return resultados;
