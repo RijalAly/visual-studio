@@ -21,16 +21,16 @@ public sealed class UtilizadorDAO
         using var leitor = comando.ExecuteReader();
         if (!leitor.Read()) return null;
 
-        string sal = leitor.GetString("Sal");
-        string hash = leitor.GetString("HashSenha");
+        string sal = Convert.ToString(leitor["Sal"]) ?? string.Empty;
+        string hash = Convert.ToString(leitor["HashSenha"]) ?? string.Empty;
         if (!Seguranca.Verificar(palavraPasse, sal, hash)) return null;
 
         return new Utilizador
         {
-            Id = leitor.GetInt32("Id"),
-            NomeUtilizador = leitor.GetString("NomeUtilizador"),
-            NomeCompleto = leitor.GetString("NomeCompleto"),
-            Perfil = leitor.GetString("Perfil")
+            Id = Convert.ToInt32(leitor["Id"]),
+            NomeUtilizador = Convert.ToString(leitor["NomeUtilizador"]) ?? string.Empty,
+            NomeCompleto = Convert.ToString(leitor["NomeCompleto"]) ?? string.Empty,
+            Perfil = Convert.ToString(leitor["Perfil"]) ?? string.Empty
         };
     }
 }
