@@ -49,7 +49,7 @@ public sealed class FormularioRevisao : Form
         if (_estado.SelectedIndex < 0) _estado.SelectedIndex = 0;
         _estado.Location = new Point(28, 138);
         _estado.Size = new Size(250, 34);
-        Tema.Est ilizarCampo(_estado);
+        Tema.EstilizarCampo(_estado);
         Controls.Add(_estado);
 
         Controls.Add(new Label
@@ -67,7 +67,7 @@ public sealed class FormularioRevisao : Form
         _observacao.ScrollBars = ScrollBars.Vertical;
         _observacao.MaxLength = 500;
         _observacao.PlaceholderText = "Registe o motivo da decisão, os elementos observados ou a razão para manter pendente...";
-        Tema.Est ilizarCampo(_observacao);
+        Tema.EstilizarCampo(_observacao);
         _observacao.TextChanged += (_, _) => _contador.Text = $"{_observacao.TextLength}/500";
         Controls.Add(_observacao);
 
