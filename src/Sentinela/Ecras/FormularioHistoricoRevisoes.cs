@@ -27,7 +27,7 @@ public sealed class FormularioHistoricoRevisoes : Form
         };
         Controls.Add(subtitulo);
 
-        Tema.Est ilizarGrelha(_grelha);
+        Tema.EstilizarGrelha(_grelha);
         _grelha.Location = new Point(20, 88);
         _grelha.Size = new Size(895, 380);
         _grelha.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
