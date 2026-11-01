@@ -112,3 +112,28 @@ A confiança é a probabilidade da classe prevista. Os factores de atenção sã
 ## 10. Limitação de validação
 
 A estrutura e os ficheiros devem ser confirmados por compilação no Visual Studio 2022 num Windows com SDK .NET 8 e MySQL/MariaDB activo. As métricas só devem ser apresentadas depois de o programa concluir um treino real.
+## 11. Melhorias recentes da aplicação
+
+**CartaoMetrica.cs** — componente reutilizável para apresentar indicadores em cartões com cor, ícone, valor e descrição.
+
+**DashboardDAO.cs / DadosPainel.cs** — consultas agregadas para o painel: contagens, volume diário, actividade dos últimos 30 dias e alertas recentes. Evitam carregar toda a tabela de transacções só para calcular os indicadores.
+
+**RevisaoDAO.cs / RevisaoHistorico.cs** — regista a decisão do analista numa transacção de base de dados, guarda o estado anterior, o novo estado, o utilizador, a data/hora e a justificação; também consulta o histórico.
+
+**FormularioRevisao.cs** — formulário para decidir o estado e escrever a justificação.
+
+**FormularioHistoricoRevisoes.cs** — apresenta as decisões anteriores de uma operação.
+
+**FormularioDetalheTransaccao.cs** — mostra os dados principais, probabilidade e factores de atenção de uma operação.
+
+**PaginaConta.cs** — permite ao utilizador alterar a própria palavra-passe, confirmando a actual e cumprindo requisitos mínimos.
+
+**TransaccaoDAO.InserirComPredicao** — grava uma nova operação juntamente com a probabilidade e classificação já calculadas, sem voltar a classificar o histórico inteiro após cada análise manual.
+
+**PaginaTransaccoes.cs** — acrescenta filtros por texto, classificação, estado, período e intervalo de valores, auditoria e exportação apenas do resultado filtrado.
+
+**PaginaClientes.cs** — acrescenta pesquisa, filtro dos registos simulados e exportação CSV.
+
+**PaginaModeloIA.cs** — apresenta o histórico comparativo dos algoritmos e as métricas dos treinos anteriores.
+
+A tabela revisoes_transaccao é criada automaticamente por BaseDados.cs e também está documentada no script sentinela_ia.sql.
