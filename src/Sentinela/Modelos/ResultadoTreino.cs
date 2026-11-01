@@ -2,6 +2,8 @@ namespace Sentinela.Modelos;
 
 public sealed class ResultadoTreino
 {
+    public DateTime DataHora { get; set; }
+    public bool Escolhido { get; set; }
     public string Algoritmo { get; set; } = "";
     public string AlgoritmoAlternativo { get; set; } = "";
     public int Exemplos { get; set; }
