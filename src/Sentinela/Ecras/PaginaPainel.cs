@@ -1,3 +1,4 @@
+using System.Drawing.Drawing2D;
 using Sentinela.Controlos;
 using Sentinela.Dados;
 using Sentinela.Modelos;
@@ -7,200 +8,351 @@ namespace Sentinela.Ecras;
 
 public sealed class PaginaPainel : UserControl
 {
-    private readonly TransaccaoDAO _dao;
-    private readonly Label[] _indicadores = new Label[4];
-    private readonly GraficoActividade _grafico = new();
+    private readonly DashboardDAO _dao;
+    private readonly Button _actualizar = Tema.CriarBotaoSecundario("↻  Actualizar");
+    private readonly Label _estado = new();
+    private readonly Label _ultimaActualizacao = new();
     private readonly DataGridView _grelha = new();
+    private readonly GraficoActividade _grafico = new();
+    private readonly CartaoMetrica[] _metricas = new CartaoMetrica[6];
+    private readonly ProgressBar _pendente = new();
+    private readonly ProgressBar _confirmada = new();
+    private readonly ProgressBar _descartada = new();
+    private readonly Label _textoPendente = new();
+    private readonly Label _textoConfirmada = new();
+    private readonly Label _textoDescartada = new();
+
+    public event Action? AbrirTransaccoes;
+    public event Action? IniciarAnalise;
 
     public PaginaPainel(ConfiguracaoApp configuracao)
     {
-        _dao = new TransaccaoDAO(configuracao);
+        _dao = new DashboardDAO(configuracao);
         BackColor = Tema.Fundo;
         ConstruirInterface();
-        ActualizarDados();
+        Load += async (_, _) => await ActualizarAsync();
     }
 
     private void ConstruirInterface()
     {
-        var conteudo = new TableLayoutPanel
+        var scroll = new Panel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 4,
-            RowCount = 3,
+            AutoScroll = true,
+            BackColor = Tema.Fundo,
+            Padding = new Padding(4)
+        };
+
+        var conteudo = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 3,
+            RowCount = 5,
             BackColor = Color.Transparent,
             Padding = new Padding(0)
         };
-        for (int coluna = 0; coluna < 4; coluna++)
-            conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
-        conteudo.RowStyles.Add(new RowStyle(SizeType.Percent, 58));
-        conteudo.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
+        for (int i = 0; i < 3; i++)
+            conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.333f));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 275));
+        conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 255));
 
-        string[] nomes = { "Transacções analisadas", "Potencialmente suspeitas", "Taxa de suspeita", "Alertas por rever" };
-        for (int i = 0; i < nomes.Length; i++)
+        var cabecalho = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
+        var titulo = Tema.CriarTitulo("Visão geral", 20);
+        titulo.Location = new Point(8, 0);
+        cabecalho.Controls.Add(titulo);
+        cabecalho.Controls.Add(new Label
         {
-            var cartao = Tema.CriarCartao();
-            var legenda = new Label
-            {
-                Text = nomes[i],
-                AutoSize = true,
-                ForeColor = Tema.TextoSuave,
-                Location = new Point(16, 12)
-            };
-            _indicadores[i] = new Label
-            {
-                Text = "—",
-                AutoSize = true,
-                ForeColor = Tema.Texto,
-                Font = new Font("Segoe UI Semibold", 23),
-                Location = new Point(16, 38)
-            };
-            cartao.Controls.Add(legenda);
-            cartao.Controls.Add(_indicadores[i]);
-            conteudo.Controls.Add(cartao, i, 0);
+            Text = "Acompanhe a actividade e os alertas que precisam de atenção.",
+            AutoSize = true,
+            Location = new Point(10, 34),
+            ForeColor = Tema.TextoSuave
+        });
+
+        _actualizar.Width = 125;
+        _actualizar.Height = 36;
+        _actualizar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _actualizar.Click += async (_, _) => await ActualizarAsync();
+        cabecalho.Resize += (_, _) => _actualizar.Left = cabecalho.ClientSize.Width - _actualizar.Width - 8;
+        cabecalho.Controls.Add(_actualizar);
+        conteudo.Controls.Add(cabecalho, 0, 0);
+        conteudo.SetColumnSpan(cabecalho, 3);
+
+        _metricas[0] = new CartaoMetrica("↗", "Operações de hoje", "—", "Movimento desde a meia-noite", Tema.Azul);
+        _metricas[1] = new CartaoMetrica("◎", "Total de operações", "—", "Registos no sistema", Tema.Roxo);
+        _metricas[2] = new CartaoMetrica("!", "Alertas por rever", "—", "Exigem análise humana", Tema.Ambar);
+        _metricas[3] = new CartaoMetrica("✓", "Suspeitas confirmadas", "—", "Após revisão do analista", Tema.Vermelho);
+        _metricas[4] = new CartaoMetrica("⌂", "Clientes registados", "—", "Perfis na base de dados", Tema.Verde);
+        _metricas[5] = new CartaoMetrica("MZN", "Volume de hoje", "—", "Valor total movimentado", Tema.Azul);
+
+        for (int i = 0; i < _metricas.Length; i++)
+        {
+            _metricas[i].Dock = DockStyle.Fill;
+            _metricas[i].Margin = new Padding(6, 5, 6, 5);
+            conteudo.Controls.Add(_metricas[i], i % 3, 1 + i / 3);
         }
 
-        var cartaoGrafico = Tema.CriarCartao();
+        var cartaoGrafico = CriarCartaoSecundario();
         cartaoGrafico.Controls.Add(new Label
         {
-            Text = "Movimento dos últimos 14 dias",
+            Text = "Actividade dos últimos 30 dias",
             AutoSize = true,
             Font = new Font("Segoe UI Semibold", 11),
             ForeColor = Tema.Texto,
-            Dock = DockStyle.Top
+            Location = new Point(18, 14)
+        });
+        cartaoGrafico.Controls.Add(new Label
+        {
+            Text = "Número de operações registadas por dia",
+            AutoSize = true,
+            Font = new Font("Segoe UI", 8.5f),
+            ForeColor = Tema.TextoSuave,
+            Location = new Point(18, 38)
         });
         _grafico.Dock = DockStyle.Fill;
+        _grafico.Margin = new Padding(10, 60, 10, 8);
         cartaoGrafico.Controls.Add(_grafico);
-        conteudo.Controls.Add(cartaoGrafico, 0, 1);
-        conteudo.SetColumnSpan(cartaoGrafico, 4);
+        conteudo.Controls.Add(cartaoGrafico, 0, 3);
+        conteudo.SetColumnSpan(cartaoGrafico, 2);
 
-        var cartaoTabela = Tema.CriarCartao();
-        cartaoTabela.Controls.Add(new Label
+        var cartaoEstados = CriarCartaoSecundario();
+        cartaoEstados.Controls.Add(new Label
         {
-            Text = "Alertas mais recentes",
+            Text = "Estado das revisões",
             AutoSize = true,
             Font = new Font("Segoe UI Semibold", 11),
             ForeColor = Tema.Texto,
-            Dock = DockStyle.Top
+            Location = new Point(18, 14)
+        });
+        AdicionarEstado(cartaoEstados, "Por rever", _pendente, _textoPendente, Tema.Ambar, 58);
+        AdicionarEstado(cartaoEstados, "Confirmadas", _confirmada, _textoConfirmada, Tema.Vermelho, 123);
+        AdicionarEstado(cartaoEstados, "Descartadas", _descartada, _textoDescartada, Tema.Verde, 188);
+        conteudo.Controls.Add(cartaoEstados, 2, 3);
+
+        var cartaoAlertas = CriarCartaoSecundario();
+        cartaoAlertas.Controls.Add(new Label
+        {
+            Text = "Actividade que merece atenção",
+            AutoSize = true,
+            Font = new Font("Segoe UI Semibold", 11),
+            ForeColor = Tema.Texto,
+            Location = new Point(18, 14)
         });
 
-        _grelha.Dock = DockStyle.Fill;
-        _grelha.ReadOnly = true;
-        _grelha.AllowUserToAddRows = false;
-        _grelha.AllowUserToDeleteRows = false;
-        _grelha.RowHeadersVisible = false;
-        _grelha.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        _grelha.BackgroundColor = Color.White;
-        _grelha.BorderStyle = BorderStyle.None;
-        _grelha.EnableHeadersVisualStyles = false;
-        _grelha.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(235, 239, 245);
-        _grelha.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 9);
-        cartaoTabela.Controls.Add(_grelha);
-        conteudo.Controls.Add(cartaoTabela, 0, 2);
-        conteudo.SetColumnSpan(cartaoTabela, 4);
+        var abrir = Tema.CriarBotaoSecundario("Ver todas as operações  →");
+        abrir.Width = 190;
+        abrir.Height = 34;
+        abrir.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        abrir.Click += (_, _) => AbrirTransaccoes?.Invoke();
+        cartaoAlertas.Resize += (_, _) => abrir.Left = cartaoAlertas.ClientSize.Width - abrir.Width - 10;
+        cartaoAlertas.Controls.Add(abrir);
 
-        var actualizar = Tema.CriarBotao("Actualizar painel", Color.FromArgb(90, 105, 125));
-        actualizar.Dock = DockStyle.Bottom;
-        actualizar.Click += (_, _) => ActualizarDados();
-        Controls.Add(conteudo);
-        Controls.Add(actualizar);
+        Tema.EstilizarGrelha(_grelha);
+        _grelha.Dock = DockStyle.Fill;
+        _grelha.Margin = new Padding(8, 52, 8, 8);
+        _grelha.CellFormatting += FormatarClassificacao;
+        _grelha.CellDoubleClick += (_, _) => AbrirTransaccoes?.Invoke();
+        cartaoAlertas.Controls.Add(_grelha);
+        conteudo.Controls.Add(cartaoAlertas, 0, 4);
+        conteudo.SetColumnSpan(cartaoAlertas, 3);
+
+        _estado.AutoSize = true;
+        _estado.ForeColor = Tema.TextoSuave;
+        _estado.Dock = DockStyle.Bottom;
+        _ultimaActualizacao.AutoSize = true;
+        _ultimaActualizacao.ForeColor = Tema.TextoSuave;
+        _ultimaActualizacao.Dock = DockStyle.Bottom;
+
+        scroll.Controls.Add(conteudo);
+        Controls.Add(scroll);
+        Controls.Add(_ultimaActualizacao);
+        Controls.Add(_estado);
     }
 
-    private void ActualizarDados()
+    private static Panel CriarCartaoSecundario()
+        => new()
+        {
+            Dock = DockStyle.Fill,
+            BackColor = Color.White,
+            Margin = new Padding(6, 5, 6, 5),
+            Padding = new Padding(10),
+            BorderStyle = BorderStyle.FixedSingle
+        };
+
+    private static void AdicionarEstado(Control pai, string nome, ProgressBar barra,
+        Label texto, Color cor, int topo)
     {
+        pai.Controls.Add(new Label
+        {
+            Text = nome,
+            AutoSize = true,
+            ForeColor = Tema.Texto,
+            Location = new Point(18, topo)
+        });
+        texto.Text = "0";
+        texto.AutoSize = true;
+        texto.Font = new Font("Segoe UI Semibold", 9.5f);
+        texto.ForeColor = cor;
+        texto.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        texto.Location = new Point(210, topo);
+        pai.Controls.Add(texto);
+
+        barra.Location = new Point(18, topo + 24);
+        barra.Size = new Size(230, 12);
+        barra.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        barra.Minimum = 0;
+        barra.Maximum = 100;
+        barra.Style = ProgressBarStyle.Continuous;
+        pai.Controls.Add(barra);
+    }
+
+    private async Task ActualizarAsync()
+    {
+        _actualizar.Enabled = false;
+        _estado.Text = "A actualizar os dados do painel...";
+        UseWaitCursor = true;
+
         try
         {
-            var dados = _dao.Listar(10000);
-            int total = dados.Count;
-            int suspeitas = dados.Count(t => t.Classificacao == "Transacção potencialmente suspeita");
-            int pendentes = dados.Count(t => t.Revisao == "Pendente" &&
-                t.Classificacao == "Transacção potencialmente suspeita");
+            DadosPainel dados = await Task.Run(_dao.ObterResumo);
 
-            _indicadores[0].Text = total.ToString("N0");
-            _indicadores[1].Text = suspeitas.ToString("N0");
-            _indicadores[2].Text = total == 0 ? "0,0%" : (suspeitas * 100.0 / total).ToString("N1") + "%";
-            _indicadores[3].Text = pendentes.ToString("N0");
+            _metricas[0].Actualizar(dados.TransaccoesHoje.ToString("N0"));
+            _metricas[1].Actualizar(dados.TotalTransaccoes.ToString("N0"));
+            _metricas[2].Actualizar(dados.AlertasPendentes.ToString("N0"));
+            _metricas[3].Actualizar(dados.SuspeitasConfirmadas.ToString("N0"));
+            _metricas[4].Actualizar(dados.TotalClientes.ToString("N0"));
+            _metricas[5].Actualizar(dados.VolumeHoje.ToString("N2") + " MZN");
 
-            DateTime hoje = DateTime.Today;
-            var dias = Enumerable.Range(0, 14).Select(offset => hoje.AddDays(offset - 13)).ToList();
-            var contagens = dias.Select(d => dados.Count(t => t.DataHora.Date == d.Date)).ToList();
-            _grafico.DefinirDados(dias, contagens);
+            int totalRevisoes = dados.AlertasPendentes + dados.SuspeitasConfirmadas + dados.AlertasDescartados;
+            ActualizarBarra(_pendente, _textoPendente, dados.AlertasPendentes, totalRevisoes);
+            ActualizarBarra(_confirmada, _textoConfirmada, dados.SuspeitasConfirmadas, totalRevisoes);
+            ActualizarBarra(_descartada, _textoDescartada, dados.AlertasDescartados, totalRevisoes);
 
-            _grelha.DataSource = dados
-                .Where(t => t.Classificacao == "Transacção potencialmente suspeita")
-                .OrderByDescending(t => t.DataHora)
-                .Take(8)
-                .Select(t => new
-                {
-                    t.DataHora,
-                    t.NomeCliente,
-                    t.Valor,
-                    t.Cidade,
-                    t.Classificacao,
-                    Revisao = t.Revisao
-                }).ToList();
+            _grafico.DefinirDados(dados.Actividade);
+            _grelha.DataSource = dados.AlertasRecentes.Select(t => new LinhaAlerta
+            {
+                Id = t.Id,
+                Data = t.DataHora.ToString("dd/MM HH:mm"),
+                Cliente = t.NomeCliente,
+                Valor = t.Valor,
+                Cidade = t.Cidade,
+                Classificacao = t.Classificacao,
+                Revisao = t.Revisao
+            }).ToList();
 
+            if (_grelha.Columns["Id"] is not null) _grelha.Columns["Id"].Visible = false;
             if (_grelha.Columns["Valor"] is not null)
                 _grelha.Columns["Valor"].DefaultCellStyle.Format = "N2";
+
+            _estado.Text = "Dados actualizados.";
+            _ultimaActualizacao.Text = "Última actualização: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Não foi possível actualizar o painel.\n" + ex.Message,
-                "Painel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _estado.Text = "Não foi possível actualizar o painel. " + ex.Message;
         }
+        finally
+        {
+            UseWaitCursor = false;
+            _actualizar.Enabled = true;
+        }
+    }
+
+    private static void ActualizarBarra(ProgressBar barra, Label texto, int valor, int total)
+    {
+        int percentagem = total == 0 ? 0 : (int)Math.Round(valor * 100.0 / total);
+        barra.Value = Math.Clamp(percentagem, 0, 100);
+        texto.Text = valor.ToString("N0") + "  (" + percentagem + "%)";
+    }
+
+    private void FormatarClassificacao(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || _grelha.Columns[e.ColumnIndex].Name != "Classificacao" || e.Value is null)
+            return;
+
+        string valor = e.Value.ToString() ?? "";
+        if (valor.Contains("suspeita")) e.CellStyle.ForeColor = Tema.Vermelho;
+        else if (valor == "Atenção") e.CellStyle.ForeColor = Tema.Ambar;
+        e.CellStyle.Font = new Font("Segoe UI Semibold", 9f);
+    }
+
+    private sealed class LinhaAlerta
+    {
+        public long Id { get; set; }
+        public string Data { get; set; } = "";
+        public string Cliente { get; set; } = "";
+        public decimal Valor { get; set; }
+        public string Cidade { get; set; } = "";
+        public string Classificacao { get; set; } = "";
+        public string Revisao { get; set; } = "";
     }
 
     private sealed class GraficoActividade : Control
     {
-        private List<DateTime> _dias = new();
-        private List<int> _valores = new();
+        private List<AtividadePainel> _dados = new();
 
         public GraficoActividade()
         {
             DoubleBuffered = true;
             BackColor = Color.White;
-            MinimumSize = new Size(300, 150);
+            MinimumSize = new Size(280, 160);
         }
 
-        public void DefinirDados(List<DateTime> dias, List<int> valores)
+        public void DefinirDados(List<AtividadePainel> dados)
         {
-            _dias = dias;
-            _valores = valores;
+            _dados = dados;
             Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            if (_valores.Count == 0) return;
+            if (_dados.Count == 0)
+            {
+                using var fonteVazia = new Font("Segoe UI", 9);
+                using var pincelVazio = new SolidBrush(Tema.TextoSuave);
+                e.Graphics.DrawString("Ainda não existem operações para apresentar.", fonteVazia,
+                    pincelVazio, new PointF(18, Height / 2f));
+                return;
+            }
 
-            int maximo = Math.Max(1, _valores.Max());
-            int margemEsquerda = 42;
-            int margemInferior = 28;
-            int larguraDisponivel = Math.Max(1, ClientSize.Width - margemEsquerda - 12);
-            int alturaDisponivel = Math.Max(1, ClientSize.Height - margemInferior - 18);
-            float larguraBarra = Math.Max(4, larguraDisponivel / (float)_valores.Count * 0.55f);
-            float espaco = larguraDisponivel / (float)_valores.Count;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            int maximo = Math.Max(1, _dados.Max(x => x.Quantidade));
+            const int esquerda = 38;
+            const int topo = 12;
+            const int baixo = 28;
+            int largura = Math.Max(1, ClientSize.Width - esquerda - 14);
+            int altura = Math.Max(1, ClientSize.Height - topo - baixo);
+            float passo = largura / (float)_dados.Count;
+            float larguraBarra = Math.Max(3, passo * 0.58f);
 
             using var pincel = new SolidBrush(Tema.Azul);
-            using var grelha = new Pen(Color.FromArgb(230, 234, 240));
-            using var letra = new SolidBrush(Tema.TextoSuave);
-            using var fonte = new Font("Segoe UI", 8);
+            using var pincelTexto = new SolidBrush(Tema.TextoSuave);
+            using var caneta = new Pen(Tema.Borda, 1);
+            using var fonte = new Font("Segoe UI", 7.5f);
 
             for (int nivel = 0; nivel <= 4; nivel++)
             {
-                float y = 8 + alturaDisponivel - nivel * alturaDisponivel / 4f;
-                e.Graphics.DrawLine(grelha, margemEsquerda, y, ClientSize.Width - 8, y);
+                float y = topo + altura - nivel * altura / 4f;
+                e.Graphics.DrawLine(caneta, esquerda, y, ClientSize.Width - 8, y);
             }
 
-            for (int i = 0; i < _valores.Count; i++)
+            for (int i = 0; i < _dados.Count; i++)
             {
-                float altura = _valores[i] / (float)maximo * Math.Max(1, alturaDisponivel - 8);
-                float x = margemEsquerda + i * espaco + (espaco - larguraBarra) / 2;
-                float y = 8 + alturaDisponivel - altura;
-                e.Graphics.FillRectangle(pincel, x, y, larguraBarra, altura);
-                if (i % 2 == 0)
-                    e.Graphics.DrawString(_dias[i].ToString("dd/MM"), fonte, letra, x - 6, ClientSize.Height - 22);
+                float alturaBarra = _dados[i].Quantidade / (float)maximo * (altura - 8);
+                float x = esquerda + i * passo + (passo - larguraBarra) / 2;
+                float y = topo + altura - alturaBarra;
+                if (alturaBarra > 0)
+                    e.Graphics.FillRoundedRectangle(pincel,
+                        new Rectangle((int)x, (int)y, (int)larguraBarra, Math.Max(3, (int)alturaBarra)), 3);
+
+                if (i % 5 == 0 || i == _dados.Count - 1)
+                    e.Graphics.DrawString(_dados[i].Dia.ToString("dd/MM"), fonte, pincelTexto,
+                        x - 8, ClientSize.Height - 22);
             }
         }
     }
