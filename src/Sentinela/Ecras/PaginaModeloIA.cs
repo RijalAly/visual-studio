@@ -1,7 +1,6 @@
 using Sentinela.Controlos;
 using Sentinela.Dados;
 using Sentinela.Inteligencia;
-using Sentinela.Modelos;
 using Sentinela.Util;
 
 namespace Sentinela.Ecras;
@@ -12,10 +11,12 @@ public sealed class PaginaModeloIA : UserControl
     private readonly ServicoIA _servicoIA;
     private readonly TransaccaoDAO _transaccoes;
     private readonly TreinoDAO _treinos;
+    private readonly GestaoDadosDAO _gestaoDados;
     private readonly NumericUpDown _clientes = new();
     private readonly NumericUpDown _quantidade = new();
     private readonly Button _gerar = Tema.CriarBotao("Gerar dados simulados", Tema.Verde);
     private readonly Button _treinar = Tema.CriarBotao("Treinar / reaprender");
+    private readonly Button _eliminar = Tema.CriarBotao("Eliminar dados simulados", Tema.Vermelho);
     private readonly Label _estado = new();
     private readonly TextBox _relatorio = new();
 
@@ -25,6 +26,7 @@ public sealed class PaginaModeloIA : UserControl
         _servicoIA = servicoIA;
         _transaccoes = new TransaccaoDAO(configuracao);
         _treinos = new TreinoDAO(configuracao);
+        _gestaoDados = new GestaoDadosDAO(configuracao);
         BackColor = Tema.Fundo;
         ConstruirInterface();
         ActualizarHistorico();
@@ -50,13 +52,17 @@ public sealed class PaginaModeloIA : UserControl
         _quantidade.Width = 150;
 
         _gerar.Location = new Point(8, 195);
-        _gerar.Width = 220;
+        _gerar.Width = 205;
         _gerar.Click += async (_, _) => await GerarDadosAsync();
-        _treinar.Location = new Point(245, 195);
-        _treinar.Width = 220;
+        _treinar.Location = new Point(225, 195);
+        _treinar.Width = 205;
         _treinar.Click += async (_, _) => await TreinarAsync();
+        _eliminar.Location = new Point(442, 195);
+        _eliminar.Width = 220;
+        _eliminar.Click += async (_, _) => await EliminarDadosAsync();
         conteudo.Controls.Add(_gerar);
         conteudo.Controls.Add(_treinar);
+        conteudo.Controls.Add(_eliminar);
 
         _estado.Location = new Point(8, 250);
         _estado.AutoSize = true;
@@ -86,7 +92,6 @@ public sealed class PaginaModeloIA : UserControl
             MaximumSize = new Size(780, 0)
         };
         conteudo.Controls.Add(explicacao);
-
         Controls.Add(conteudo);
     }
 
@@ -121,6 +126,33 @@ public sealed class PaginaModeloIA : UserControl
         {
             _estado.Text = "A geração não foi concluída.";
             MessageBox.Show(ex.Message, "Geração de dados",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            ActivarControlos(true);
+        }
+    }
+
+    private async Task EliminarDadosAsync()
+    {
+        var resposta = MessageBox.Show(
+            "Serão eliminados os clientes simulados e as transacções associadas a esses clientes. Pretende continuar?",
+            "Eliminar dados simulados", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        if (resposta != DialogResult.Yes) return;
+
+        ActivarControlos(false);
+        _estado.Text = "A eliminar os dados simulados...";
+        try
+        {
+            await Task.Run(_gestaoDados.EliminarDadosSimulados);
+            _estado.Text = "Os dados simulados foram eliminados.";
+            _relatorio.Clear();
+        }
+        catch (Exception ex)
+        {
+            _estado.Text = "A eliminação não foi concluída.";
+            MessageBox.Show(ex.Message, "Dados simulados",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
@@ -214,6 +246,7 @@ public sealed class PaginaModeloIA : UserControl
     {
         _gerar.Enabled = activo;
         _treinar.Enabled = activo;
+        _eliminar.Enabled = activo;
         _clientes.Enabled = activo;
         _quantidade.Enabled = activo;
         UseWaitCursor = !activo;
