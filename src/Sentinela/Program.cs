@@ -1,5 +1,7 @@
+using System.Globalization;
 using Sentinela.Dados;
 using Sentinela.Ecras;
+using Sentinela.Inteligencia;
 using Sentinela.Util;
 
 namespace Sentinela;
@@ -9,6 +11,10 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
+        var cultura = CultureInfo.GetCultureInfo("pt-PT");
+        CultureInfo.DefaultThreadCurrentCulture = cultura;
+        CultureInfo.DefaultThreadCurrentUICulture = cultura;
+
         ApplicationConfiguration.Initialize();
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += (_, e) =>
@@ -28,7 +34,8 @@ internal static class Program
             }
 
             BaseDados.Inicializar(configuracao);
-            Application.Run(new FormularioLogin(configuracao));
+            var servicoIA = new ServicoIA(configuracao);
+            Application.Run(new FormularioLogin(configuracao, servicoIA));
         }
         catch (Exception ex)
         {
