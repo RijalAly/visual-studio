@@ -60,9 +60,24 @@ public sealed class ClienteDAO
     public void Eliminar(int id)
     {
         using var ligacao = ConexaoBD.Abrir(_configuracao);
-        using var comando = new MySqlCommand("DELETE FROM clientes WHERE Id=@id", ligacao);
-        comando.Parameters.AddWithValue("@id", id);
-        comando.ExecuteNonQuery();
+        using var transaccao = ligacao.BeginTransaction();
+
+        using (var auditoria = new MySqlCommand(
+            @"DELETE FROM revisoes_transaccao
+              WHERE TransaccaoId IN (SELECT Id FROM transaccoes WHERE ClienteId=@id)",
+            ligacao, transaccao))
+        {
+            auditoria.Parameters.AddWithValue("@id", id);
+            auditoria.ExecuteNonQuery();
+        }
+
+        using (var comando = new MySqlCommand("DELETE FROM clientes WHERE Id=@id", ligacao, transaccao))
+        {
+            comando.Parameters.AddWithValue("@id", id);
+            comando.ExecuteNonQuery();
+        }
+
+        transaccao.Commit();
     }
 
     private static void PreencherParametros(MySqlCommand comando, Cliente cliente)
