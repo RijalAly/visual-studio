@@ -152,7 +152,7 @@ public sealed class PaginaTransaccoes : UserControl
 
     private void FormatarCelula(object? sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (_grelha.Columns[e.ColumnIndex].Name != "Classificacao" || e.Value is null) return;
+        if (_grelha.Columns[e.ColumnIndex].Name != "Classificacao" || e.Value is null || e.CellStyle is null) return;
 
         string valor = e.Value.ToString() ?? "";
         e.CellStyle.ForeColor = valor.Contains("suspeita") ? Tema.Vermelho
