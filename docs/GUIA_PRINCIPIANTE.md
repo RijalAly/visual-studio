@@ -117,3 +117,14 @@ Abra Transacções, marque um alerta como Confirmada ou Descartada, volte a Mode
 ## F. Limites que devem ser referidos
 
 Os dados são simulados e foram criados segundo padrões definidos para a experiência. O modelo aprende esses padrões; as métricas não provam que detectaria fraude real. Uma operação suspeita é apenas um alerta para avaliação por uma pessoa.
+## G. Funções acrescentadas na interface
+
+**Pesquisar e filtrar operações:** no ecrã Transacções, introduza nome, número de conta ou ID. Pode combinar os filtros de classificação e revisão com um período e intervalo de valores. A exportação CSV contém apenas os resultados visíveis.
+
+**Rever e justificar um alerta:** seleccione uma operação e carregue em Rever operação. Escolha Pendente, Confirmada ou Descartada. Para confirmar ou descartar, escreva uma justificação com pelo menos oito caracteres. O histórico de auditoria identifica o analista, a data/hora, o estado anterior, o novo estado e a observação.
+
+**Consultar auditoria:** seleccione a operação e abra Histórico. A janela apresenta todas as decisões registadas para aquela operação.
+
+**Alterar a palavra-passe:** abra Conta e segurança, introduza a palavra-passe actual e escolha a nova. A nova palavra-passe exige pelo menos dez caracteres, uma maiúscula, uma minúscula e um número.
+
+**Limpar dados de demonstração:** no ecrã Modelo de IA, a opção de eliminação remove as operações simuladas. Os registos manuais são preservados; clientes de demonstração que ainda tenham operações associadas permanecem na base de dados.
