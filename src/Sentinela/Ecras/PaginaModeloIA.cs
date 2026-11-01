@@ -168,9 +168,12 @@ public sealed class PaginaModeloIA : UserControl
         _estado.Text = "A ler e preparar os dados...";
         try
         {
+            var progresso = new Progress<string>(mensagem => _estado.Text = mensagem);
             var pacote = await Task.Run(() =>
             {
+                progresso.Report("A consultar os registos no MySQL...");
                 var brutos = _transaccoes.ObterDadosTreino();
+                progresso.Report("A validar registos e a remover duplicados...");
                 var preparacao = new PreparadorDados().Preparar(brutos);
                 int revisoes = _transaccoes.ListarPorRevisao("Confirmada").Count +
                                _transaccoes.ListarPorRevisao("Descartada").Count;
@@ -178,7 +181,8 @@ public sealed class PaginaModeloIA : UserControl
                 if (preparacao.Dados.Count < 100)
                     throw new InvalidOperationException("Existem menos de 100 registos válidos. Gere mais dados antes do treino.");
 
-                var resultado = _servicoIA.Treinar(preparacao.Dados, revisoes);
+                var resultado = _servicoIA.Treinar(preparacao.Dados, revisoes, progresso.Report);
+                progresso.Report("A aplicar o modelo a todas as transacções...");
                 _transaccoes.ClassificarTodos(_servicoIA.Analisar);
                 return (preparacao, resultado);
             });
