@@ -22,8 +22,8 @@ public sealed class FormularioLigacao : Form
         Configuracao = actual;
         Tema.PrepararFormulario(this);
         Text = "Sentinela | Configuração da ligação";
-        ClientSize = new Size(820, 600);
-        MinimumSize = new Size(760, 560);
+        ClientSize = new Size(820, 640);
+        MinimumSize = new Size(760, 600);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
 
