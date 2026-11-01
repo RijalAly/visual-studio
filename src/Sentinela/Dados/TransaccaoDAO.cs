@@ -76,7 +76,7 @@ public sealed class TransaccaoDAO
             @"SELECT t.*, c.Nome AS NomeCliente, c.NumeroConta
               FROM transaccoes t INNER JOIN clientes c ON c.Id=t.ClienteId
               ORDER BY t.DataHora DESC LIMIT @limite", ligacao);
-        comando.Parameters.AddWithValue("@limite", Math.Clamp(limite, 1, 10000));
+        comando.Parameters.AddWithValue("@limite", Math.Clamp(limite, 1, 100000));
         using var leitor = comando.ExecuteReader();
         while (leitor.Read()) lista.Add(LerTransaccao(leitor));
         return lista;
@@ -96,7 +96,7 @@ public sealed class TransaccaoDAO
         return lista;
     }
 
-    public void GuardarRevisao(int id, string revisao)
+    public void GuardarRevisao(long id, string revisao)
     {
         if (revisao is not ("Confirmada" or "Descartada" or "Pendente"))
             throw new ArgumentException("Estado de revisão inválido.");
@@ -130,14 +130,14 @@ public sealed class TransaccaoDAO
             dados.Add(new DadosIA
             {
                 Label = etiqueta == 1,
-                Valor = Convert.ToSingle(leitor.GetDecimal("Valor")),
-                Hora = leitor.GetDateTime("DataHora").Hour,
-                RelacaoMedia = leitor.GetFloat("RelacaoMedia"),
-                OperacoesUltimaHora = leitor.GetInt32("OperacoesUltimaHora"),
-                CidadeDiferente = leitor.GetBoolean("CidadeDiferente") ? 1 : 0,
-                BeneficiarioNovo = leitor.GetBoolean("BeneficiarioNovo") ? 1 : 0,
-                Tipo = leitor.GetString("Tipo"),
-                Canal = leitor.GetString("Canal")
+                Valor = Convert.ToSingle(Convert.ToDecimal(leitor["Valor"])),
+                Hora = Convert.ToDateTime(leitor["DataHora"]).Hour,
+                RelacaoMedia = Convert.ToSingle(leitor["RelacaoMedia"]),
+                OperacoesUltimaHora = Convert.ToInt32(leitor["OperacoesUltimaHora"]),
+                CidadeDiferente = Convert.ToBoolean(leitor["CidadeDiferente"]) ? 1 : 0,
+                BeneficiarioNovo = Convert.ToBoolean(leitor["BeneficiarioNovo"]) ? 1 : 0,
+                Tipo = Convert.ToString(leitor["Tipo"]) ?? string.Empty,
+                Canal = Convert.ToString(leitor["Canal"]) ?? string.Empty
             });
         }
         return dados;
@@ -165,7 +165,7 @@ public sealed class TransaccaoDAO
 
     public void ClassificarTodos(Func<Transaccao, ResultadoAnalise> analisar)
     {
-        var lista = Listar(10000);
+        var lista = Listar(100000);
         var resultados = lista.Select(t =>
         {
             var resultado = analisar(t);
@@ -176,23 +176,23 @@ public sealed class TransaccaoDAO
 
     private static Transaccao LerTransaccao(MySqlDataReader leitor) => new()
     {
-        Id = Convert.ToInt32(leitor["Id"]),
-        ClienteId = leitor.GetInt32("ClienteId"),
-        NomeCliente = leitor.GetString("NomeCliente"),
-        NumeroConta = leitor.GetString("NumeroConta"),
-        DataHora = leitor.GetDateTime("DataHora"),
-        Valor = leitor.GetDecimal("Valor"),
-        Tipo = leitor.GetString("Tipo"),
-        Canal = leitor.GetString("Canal"),
-        Cidade = leitor.GetString("Cidade"),
-        CidadeDiferente = leitor.GetBoolean("CidadeDiferente"),
-        BeneficiarioNovo = leitor.GetBoolean("BeneficiarioNovo"),
-        OperacoesUltimaHora = leitor.GetInt32("OperacoesUltimaHora"),
-        RelacaoMedia = leitor.GetFloat("RelacaoMedia"),
+        Id = Convert.ToInt64(leitor["Id"]),
+        ClienteId = Convert.ToInt32(leitor["ClienteId"]),
+        NomeCliente = Convert.ToString(leitor["NomeCliente"]) ?? string.Empty,
+        NumeroConta = Convert.ToString(leitor["NumeroConta"]) ?? string.Empty,
+        DataHora = Convert.ToDateTime(leitor["DataHora"]),
+        Valor = Convert.ToDecimal(leitor["Valor"]),
+        Tipo = Convert.ToString(leitor["Tipo"]) ?? string.Empty,
+        Canal = Convert.ToString(leitor["Canal"]) ?? string.Empty,
+        Cidade = Convert.ToString(leitor["Cidade"]) ?? string.Empty,
+        CidadeDiferente = Convert.ToBoolean(leitor["CidadeDiferente"]),
+        BeneficiarioNovo = Convert.ToBoolean(leitor["BeneficiarioNovo"]),
+        OperacoesUltimaHora = Convert.ToInt32(leitor["OperacoesUltimaHora"]),
+        RelacaoMedia = Convert.ToSingle(leitor["RelacaoMedia"]),
         Pontuacao = leitor["Pontuacao"] is DBNull ? null : Convert.ToSingle(leitor["Pontuacao"]),
-        Classificacao = leitor.GetString("Classificacao"),
-        Revisao = leitor.GetString("Revisao"),
-        Origem = leitor.GetString("Origem"),
+        Classificacao = Convert.ToString(leitor["Classificacao"]) ?? string.Empty,
+        Revisao = Convert.ToString(leitor["Revisao"]) ?? string.Empty,
+        Origem = Convert.ToString(leitor["Origem"]) ?? string.Empty,
         Etiqueta = leitor["Etiqueta"] is DBNull ? null : Convert.ToInt32(leitor["Etiqueta"]) == 1
     };
 }
