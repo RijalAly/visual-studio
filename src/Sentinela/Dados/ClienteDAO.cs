@@ -76,12 +76,12 @@ public sealed class ClienteDAO
 
     private static Cliente LerCliente(MySqlDataReader leitor) => new()
     {
-        Id = leitor.GetInt32("Id"),
-        Nome = leitor.GetString("Nome"),
-        NumeroConta = leitor.GetString("NumeroConta"),
-        CidadeHabitual = leitor.GetString("CidadeHabitual"),
-        MediaValor = leitor.GetDecimal("MediaValor"),
-        Simulado = leitor.GetBoolean("Simulado"),
-        CriadoEm = leitor.GetDateTime("CriadoEm")
+        Id = Convert.ToInt32(leitor["Id"]),
+        Nome = Convert.ToString(leitor["Nome"]) ?? string.Empty,
+        NumeroConta = Convert.ToString(leitor["NumeroConta"]) ?? string.Empty,
+        CidadeHabitual = Convert.ToString(leitor["CidadeHabitual"]) ?? string.Empty,
+        MediaValor = Convert.ToDecimal(leitor["MediaValor"]),
+        Simulado = Convert.ToBoolean(leitor["Simulado"]),
+        CriadoEm = Convert.ToDateTime(leitor["CriadoEm"])
     };
 }
