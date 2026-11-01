@@ -168,7 +168,7 @@ public sealed class PaginaModeloIA : UserControl
         _estado.Text = "A ler e preparar os dados...";
         try
         {
-            var progresso = new Progress<string>(mensagem => _estado.Text = mensagem);
+            IProgress<string> progresso = new Progress<string>(mensagem => _estado.Text = mensagem);
             var pacote = await Task.Run(() =>
             {
                 progresso.Report("A consultar os registos no MySQL...");
