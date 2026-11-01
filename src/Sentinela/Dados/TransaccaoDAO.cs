@@ -55,6 +55,36 @@ public sealed class TransaccaoDAO
         transaccaoBD.Commit();
     }
 
+    public long InserirComPredicao(Transaccao item, ResultadoAnalise resultado)
+    {
+        using var ligacao = ConexaoBD.Abrir(_configuracao);
+        using var comando = new MySqlCommand(
+            @"INSERT INTO transaccoes
+              (ClienteId, DataHora, Valor, Tipo, Canal, Cidade, CidadeDiferente,
+               BeneficiarioNovo, OperacoesUltimaHora, RelacaoMedia, Pontuacao,
+               Classificacao, Revisao, Origem, Etiqueta)
+              VALUES (@cliente, @data, @valor, @tipo, @canal, @cidade, @cidadeDif,
+               @benefNovo, @operacoes, @relacao, @pontuacao, @classificacao,
+               'Pendente', @origem, NULL);
+               SELECT LAST_INSERT_ID();",
+            ligacao);
+
+        comando.Parameters.AddWithValue("@cliente", item.ClienteId);
+        comando.Parameters.AddWithValue("@data", item.DataHora);
+        comando.Parameters.AddWithValue("@valor", item.Valor);
+        comando.Parameters.AddWithValue("@tipo", item.Tipo);
+        comando.Parameters.AddWithValue("@canal", item.Canal);
+        comando.Parameters.AddWithValue("@cidade", item.Cidade);
+        comando.Parameters.AddWithValue("@cidadeDif", item.CidadeDiferente);
+        comando.Parameters.AddWithValue("@benefNovo", item.BeneficiarioNovo);
+        comando.Parameters.AddWithValue("@operacoes", item.OperacoesUltimaHora);
+        comando.Parameters.AddWithValue("@relacao", item.RelacaoMedia);
+        comando.Parameters.AddWithValue("@pontuacao", resultado.Probabilidade);
+        comando.Parameters.AddWithValue("@classificacao", resultado.Classificacao);
+        comando.Parameters.AddWithValue("@origem", item.Origem);
+        return Convert.ToInt64(comando.ExecuteScalar());
+    }
+
     public int ContarUltimaHora(int clienteId, DateTime dataHora)
     {
         using var ligacao = ConexaoBD.Abrir(_configuracao);
