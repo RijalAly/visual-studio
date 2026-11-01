@@ -1,3 +1,4 @@
+using System.Drawing.Drawing2D;
 using Sentinela.Controlos;
 using Sentinela.Inteligencia;
 using Sentinela.Modelos;
