@@ -63,3 +63,11 @@ Os dados de demonstração são fictícios e foram criados segundo padrões defi
 ## Verificação da compilação
 
 Foi adicionada uma rotina GitHub Actions para restaurar os pacotes e compilar a solução num executor Windows com .NET 8. A execução final da aplicação também deve ser confirmada localmente com MySQL ou MariaDB activo.
+
+## Descarregar o código ou a aplicação
+
+- **Código-fonte:** abra o repositório e escolha **Code → Download ZIP**. Extraia a pasta e abra `Sentinela.sln` no Visual Studio.
+- **Aplicação Windows:** depois de uma execução bem-sucedida do GitHub Actions, abra [Compilar Sentinela](https://github.com/RijalAly/visual-studio/actions/workflows/build.yml), escolha a execução mais recente e descarregue o artefacto `Sentinela-Windows-x64`.
+
+A versão publicada é dependente do .NET 8 Desktop Runtime e precisa de uma instância MySQL ou MariaDB activa. O pacote não inclui um servidor de base de dados.
+
