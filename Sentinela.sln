@@ -2,17 +2,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentinela", "src\\Sentinela\\Sentinela.csproj", "{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentinela", "src\Sentinela\Sentinela.csproj", "{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}"
 EndProject
 Global
-\tGlobalSection(SolutionConfigurationPlatforms) = preSolution
-\t\tDebug|Any CPU = Debug|Any CPU
-\t\tRelease|Any CPU = Release|Any CPU
-\tEndGlobalSection
-\tGlobalSection(ProjectConfigurationPlatforms) = postSolution
-\t\t{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-\t\t{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-\t\t{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-\t\t{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Release|Any CPU.Build.0 = Release|Any CPU
-\tEndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B1720E8-4F6E-4A8E-99C4-A1D8F89D40A1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 EndGlobal
