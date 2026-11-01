@@ -25,13 +25,13 @@ public sealed class PaginaPainel : UserControl
         var conteudo = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
+            ColumnCount = 4,
             RowCount = 3,
             BackColor = Color.Transparent,
             Padding = new Padding(0)
         };
-        conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        for (int coluna = 0; coluna < 4; coluna++)
+            conteudo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
         conteudo.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
         conteudo.RowStyles.Add(new RowStyle(SizeType.Percent, 58));
         conteudo.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
@@ -57,7 +57,7 @@ public sealed class PaginaPainel : UserControl
             };
             cartao.Controls.Add(legenda);
             cartao.Controls.Add(_indicadores[i]);
-            conteudo.Controls.Add(cartao, i % 2, 0);
+            conteudo.Controls.Add(cartao, i, 0);
         }
 
         var cartaoGrafico = Tema.CriarCartao();
@@ -72,7 +72,7 @@ public sealed class PaginaPainel : UserControl
         _grafico.Dock = DockStyle.Fill;
         cartaoGrafico.Controls.Add(_grafico);
         conteudo.Controls.Add(cartaoGrafico, 0, 1);
-        conteudo.SetColumnSpan(cartaoGrafico, 2);
+        conteudo.SetColumnSpan(cartaoGrafico, 4);
 
         var cartaoTabela = Tema.CriarCartao();
         cartaoTabela.Controls.Add(new Label
@@ -97,7 +97,7 @@ public sealed class PaginaPainel : UserControl
         _grelha.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 9);
         cartaoTabela.Controls.Add(_grelha);
         conteudo.Controls.Add(cartaoTabela, 0, 2);
-        conteudo.SetColumnSpan(cartaoTabela, 2);
+        conteudo.SetColumnSpan(cartaoTabela, 4);
 
         var actualizar = Tema.CriarBotao("Actualizar painel", Color.FromArgb(90, 105, 125));
         actualizar.Dock = DockStyle.Bottom;
