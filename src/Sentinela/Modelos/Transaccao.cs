@@ -2,7 +2,7 @@ namespace Sentinela.Modelos;
 
 public sealed class Transaccao
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public int ClienteId { get; set; }
     public string NomeCliente { get; set; } = "";
     public string NumeroConta { get; set; } = "";
