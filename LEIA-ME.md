@@ -86,4 +86,20 @@ O repositório contém o código-fonte e a solução do Visual Studio. Para desc
 5. Inicie `Sentinela.exe`.
 
 A aplicação publicada necessita do .NET 8 Desktop Runtime para Windows e de MySQL ou MariaDB activo. O ZIP não inclui nem instala o servidor de base de dados.
+## Melhorias da interface e funcionalidades
 
+A versão actual organiza a aplicação com navegação lateral, cartões de indicadores, estados visuais e formulários mais claros.
+
+**Painel:** seis indicadores, actividade dos últimos 30 dias e revisão pendente/confirmada/descartada.
+
+**Transacções:** filtros por pesquisa, classificação, estado, período e intervalo de valores. A exportação CSV respeita o resultado filtrado.
+
+**Auditoria:** ao rever uma operação, o analista escolhe o novo estado e regista uma justificação. O histórico guarda a identidade do analista e a data/hora da decisão.
+
+**Análise manual:** o sistema apresenta a relação entre o valor introduzido e a média do cliente. A nova operação é guardada juntamente com a previsão produzida pelo modelo, sem reclassificar todos os registos sempre que se faz uma análise.
+
+**Clientes:** pesquisa por nome, conta e cidade, filtro de registos de demonstração e exportação CSV.
+
+**Conta e segurança:** cada utilizador pode alterar a sua palavra-passe, confirmando primeiro a palavra-passe actual. A nova palavra-passe deve ter pelo menos 10 caracteres, uma letra maiúscula, uma minúscula e um número.
+
+**Limpeza da demonstração:** remove as operações simuladas e a respectiva auditoria; preserva as operações manuais e os clientes que ainda tenham operações associadas.
