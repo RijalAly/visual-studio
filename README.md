@@ -70,4 +70,18 @@ Foi adicionada uma rotina GitHub Actions para restaurar os pacotes e compilar a 
 - **Aplicação Windows:** depois de uma execução bem-sucedida do GitHub Actions, abra [Compilar Sentinela](https://github.com/RijalAly/visual-studio/actions/workflows/build.yml), escolha a execução mais recente e descarregue o artefacto `Sentinela-Windows-x64`.
 
 A versão publicada é dependente do .NET 8 Desktop Runtime e precisa de uma instância MySQL ou MariaDB activa. O pacote não inclui um servidor de base de dados.
+## Melhorias da versão de interface e análise
 
+- Navegação lateral com página activa, atalhos e identificação do utilizador.
+- Painel com seis indicadores, actividade dos últimos 30 dias e distribuição das revisões.
+- Carregamento em segundo plano em operações mais demoradas para reduzir bloqueios da interface.
+- Análise manual com pré-visualização da relação entre o valor e a média habitual.
+- Gravação directa da previsão da nova operação, sem reclassificar todo o histórico após cada análise.
+- Filtros de transacções por texto, classificação, revisão, período e intervalo de valores.
+- Exportação CSV apenas das operações visíveis após os filtros.
+- Histórico de auditoria com analista, data/hora, estado anterior, novo estado e justificação.
+- Gestão de clientes com pesquisa, filtro dos dados de demonstração e exportação CSV.
+- Área Conta e segurança para alterar a palavra-passe com verificação da actual e requisitos mínimos.
+- Limpeza de dados simulados que preserva operações manuais e os clientes que ainda tenham operações associadas.
+
+A validação continua a ser feita por compilação e publicação Windows x64 no GitHub Actions. A aplicação deve ainda ser testada com uma base MySQL/MariaDB real.
