@@ -17,10 +17,7 @@ public sealed class GeradorDados
         "Levantamento", "Transferência", "Pagamento", "Depósito", "Carteira móvel"
     };
 
-    private static readonly string[] Canais =
-    {
-        "ATM", "Telemóvel", "Internet banking", "POS"
-    };
+    private static readonly string[] Canais = { "ATM", "Telemóvel", "Internet banking", "POS" };
 
     private static readonly string[] Nomes =
     {
@@ -69,21 +66,20 @@ public sealed class GeradorDados
             var cliente = clientes[_aleatorio.Next(clientes.Count)];
             bool suspeita = _aleatorio.NextDouble() < 0.07;
             DateTime dataHora = DateTime.Now.AddDays(-_aleatorio.Next(1, 61))
-                .Date.AddHours(_aleatorio.Next(0, 24))
-                .AddMinutes(_aleatorio.Next(0, 60));
+                .Date.AddHours(_aleatorio.Next(0, 24)).AddMinutes(_aleatorio.Next(0, 60));
 
             decimal valor = Math.Round(cliente.MediaValor * (decimal)Math.Exp(Normal() * 0.65), 2);
             int operacoes = _aleatorio.Next(0, 4);
             bool cidadeDiferente = false;
-            bool beneficiarioNovo = _aleatorio.NextDouble() < 0.08;
+            bool beneficiarioNovo = false;
 
-            int sinaisPretendidos;
-            if (suspeita)
-                sinaisPretendidos = _aleatorio.NextDouble() < 0.10 ? 1 : _aleatorio.Next(2, 6);
-            else
-                sinaisPretendidos = _aleatorio.NextDouble() < 0.04 ? 1 : 0;
+            int sinaisPretendidos = suspeita
+                ? (_aleatorio.NextDouble() < 0.10 ? 1 : _aleatorio.Next(2, 6))
+                : (_aleatorio.NextDouble() < 0.04 ? 1 : 0);
 
-            var sinais = Enumerable.Range(0, 5).OrderBy(_ => _aleatorio.Next()).Take(sinaisPretendidos).ToHashSet();
+            var sinais = Enumerable.Range(0, 5)
+                .OrderBy(_ => _aleatorio.Next()).Take(sinaisPretendidos).ToHashSet();
+
             if (sinais.Contains(0))
                 valor = Math.Round(cliente.MediaValor * (decimal)(6 + _aleatorio.NextDouble() * 24), 2);
             if (sinais.Contains(1))
