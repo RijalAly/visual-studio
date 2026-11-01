@@ -49,6 +49,18 @@ CREATE TABLE IF NOT EXISTS transaccoes (
     INDEX ix_transaccoes_revisao (Revisao, Classificacao)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS revisoes_transaccao (
+    Id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    TransaccaoId BIGINT NOT NULL,
+    UtilizadorId INT NOT NULL,
+    EstadoAnterior VARCHAR(20) NOT NULL,
+    EstadoNovo VARCHAR(20) NOT NULL,
+    Observacao VARCHAR(500) NOT NULL,
+    DataHora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX ix_revisao_transaccao_data (TransaccaoId, DataHora),
+    INDEX ix_revisao_utilizador (UtilizadorId)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS treinos (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     DataHora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
