@@ -26,7 +26,8 @@ public sealed class FormularioPrincipal : Form
         ("Transacções", "⇄", "Pesquise operações, reveja alertas e consulte o histórico."),
         ("Clientes", "♙", "Consulte e mantenha os perfis dos clientes."),
         ("Modelo de IA", "✧", "Gere dados, treine, compare e acompanhe o modelo."),
-        ("Sobre e ajuda", "ⓘ", "Informação do projecto, utilização e limitações.")
+        ("Sobre e ajuda", "ⓘ", "Informação do projecto, utilização e limitações."),
+        ("Conta e segurança", "⚙", "Consulte o seu perfil e altere a palavra-passe.")
     };
 
     public FormularioPrincipal(ConfiguracaoApp configuracao, Utilizador utilizador, ServicoIA servicoIA)
@@ -332,6 +333,7 @@ public sealed class FormularioPrincipal : Form
             "Transacções" => new PaginaTransaccoes(_configuracao, _utilizador),
             "Clientes" => new PaginaClientes(_configuracao),
             "Modelo de IA" => new PaginaModeloIA(_configuracao, _servicoIA),
+            "Conta e segurança" => new PaginaConta(_configuracao, _utilizador),
             _ => new PaginaSobre()
         };
 
